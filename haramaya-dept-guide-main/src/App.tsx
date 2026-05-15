@@ -13,6 +13,7 @@ import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import Announcements from "./pages/Announcements";
 import AcademicCalendar from "./pages/AcademicCalendar";
+import CourseCatalog from "./pages/CourseCatalog";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
           <Route path="/settings" element={<Settings />} />
           <Route path="/announcements" element={<Announcements />} />
           <Route path="/calendar" element={<AcademicCalendar />} />
+          <Route path="/catalog" element={<CourseCatalog />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

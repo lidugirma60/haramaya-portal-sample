@@ -11,6 +11,7 @@ import {
   type Student,
   type Department,
 } from "@/lib/data";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -159,7 +160,10 @@ export default function Register() {
   const inputClass = "input-field";
 
   return (
-    <div className="min-h-screen bg-background py-8 px-4">
+    <div className="min-h-screen bg-background py-8 px-4 relative">
+      <div className="absolute top-4 right-4 z-10">
+        <ThemeToggle />
+      </div>
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">

@@ -9,9 +9,11 @@ type DeptStarButtonProps = {
   className?: string;
   /** Larger hit target on dense cards */
   size?: "sm" | "md";
+  /** Light icon on primary / hero backgrounds */
+  tone?: "default" | "inverse";
 };
 
-export function DeptStarButton({ deptId, className, size = "sm" }: DeptStarButtonProps) {
+export function DeptStarButton({ deptId, className, size = "sm", tone = "default" }: DeptStarButtonProps) {
   const [starred, setStarred] = useState(() => isDeptStarred(deptId));
 
   useEffect(() => {
@@ -41,9 +43,13 @@ export function DeptStarButton({ deptId, className, size = "sm" }: DeptStarButto
       }}
       className={cn(
         "rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-        starred
-          ? "text-secondary bg-secondary/15 hover:bg-secondary/25"
-          : "text-muted-foreground hover:bg-muted hover:text-foreground",
+        tone === "inverse"
+          ? starred
+            ? "text-secondary bg-primary-foreground/15 hover:bg-primary-foreground/25"
+            : "text-primary-foreground/85 hover:bg-primary-foreground/15 hover:text-primary-foreground"
+          : starred
+            ? "text-secondary bg-secondary/15 hover:bg-secondary/25"
+            : "text-muted-foreground hover:bg-muted hover:text-foreground",
         pad,
         className,
       )}

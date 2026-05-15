@@ -1,5 +1,6 @@
 import type { Course } from "@/lib/data";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface CourseCardProps {
   course: Course;
@@ -46,8 +47,13 @@ export function CourseCard({ course, variant = "default", disabled }: CourseCard
             {course.credits} Cr
           </span>
           <button
+            type="button"
             className="text-xs text-primary hover:text-primary/80 font-medium transition-colors"
-            onClick={() => alert("Syllabus download simulated")}
+            onClick={() =>
+              toast.info("Syllabus preview", {
+                description: `${course.code}: official PDFs would be linked from the registrar in production.`,
+              })
+            }
           >
             📄 Syllabus
           </button>

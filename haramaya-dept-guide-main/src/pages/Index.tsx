@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getSession, seedDataIfEmpty } from "@/lib/data";
 import { Link } from "react-router-dom";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function Index() {
   const navigate = useNavigate();
@@ -28,7 +29,8 @@ export default function Index() {
                 Haramaya University
               </span>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <ThemeToggle variant="hero" />
               <Link
                 to="/login"
                 className="text-primary-foreground/80 hover:text-primary-foreground transition-colors font-medium"

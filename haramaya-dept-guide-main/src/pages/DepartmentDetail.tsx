@@ -1,40 +1,35 @@
 import { useParams, Navigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { PortalLayout } from "@/components/portal/PortalLayout";
 import { SemesterTabs } from "@/components/portal/SemesterTabs";
+import { DeptStarButton } from "@/components/portal/DeptStarButton";
 import {
   getDepartmentById,
   getCurrentStudent,
   getFreshmanCourses,
+  type Course,
   type Department,
+  type FreshmanCourses,
   type Student,
 } from "@/lib/data";
+import { recordDepartmentVisit } from "@/lib/portalPrefs";
+import { Button } from "@/components/ui/button";
+import { Copy } from "lucide-react";
+import { toast } from "sonner";
 
 export default function DepartmentDetail() {
   const { deptId } = useParams<{ deptId: string }>();
-  const [department, setDepartment] = useState<Department | null>(null);
-  const [student, setStudent] = useState<Student | null>(null);
-  const [loading, setLoading] = useState(true);
+  const department = useMemo(
+    () => (deptId ? getDepartmentById(deptId) ?? null : null),
+    [deptId],
+  );
+  const student = getCurrentStudent();
 
   useEffect(() => {
-    if (deptId) {
-      const dept = getDepartmentById(deptId);
-      setDepartment(dept || null);
-      setStudent(getCurrentStudent());
-      setLoading(false);
+    if (department?.id) {
+      recordDepartmentVisit(department.id);
     }
-  }, [deptId]);
-
-  if (loading) {
-    return (
-      <PortalLayout title="Loading...">
-        <div className="space-y-4">
-          <div className="skeleton h-32 rounded-xl" />
-          <div className="skeleton h-64 rounded-xl" />
-        </div>
-      </PortalLayout>
-    );
-  }
+  }, [department?.id]);
 
   if (!department) {
     return <Navigate to="/dashboard" replace />;
@@ -46,17 +41,35 @@ export default function DepartmentDetail() {
   const yearKey = `year${student?.year}`;
   const departmentCourses = department.courses[yearKey] || { sem1: [], sem2: [] };
 
+  const handleCopyStudyPlan = async () => {
+    const text = buildStudyPlanExport({
+      department,
+      student,
+      isFirstYear,
+      freshmanCourses,
+      departmentCourses,
+    });
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success("Study plan copied", {
+        description: "Paste into Notes, email, or a document.",
+      });
+    } catch {
+      toast.error("Could not copy", { description: "Your browser may block clipboard access." });
+    }
+  };
+
   return (
     <PortalLayout title={department.name}>
       <div className="space-y-6">
         {/* Department Header */}
         <div className="card-elevated overflow-hidden animate-fade-in">
           <div className="gradient-primary p-6 lg:p-8">
-            <div className="flex items-start gap-4">
-              <div className="w-16 h-16 rounded-xl bg-primary-foreground/20 flex items-center justify-center text-4xl">
+            <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+              <div className="w-16 h-16 rounded-xl bg-primary-foreground/20 flex items-center justify-center text-4xl shrink-0">
                 {department.icon}
               </div>
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <h1 className="font-heading text-2xl lg:text-3xl font-bold text-primary-foreground">
                   {department.name}
                 </h1>
@@ -68,6 +81,19 @@ export default function DepartmentDetail() {
                     ✓ Your Department
                   </span>
                 )}
+              </div>
+              <div className="flex items-center gap-2 shrink-0 sm:flex-col sm:items-end">
+                <DeptStarButton deptId={department.id} size="md" tone="inverse" />
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={handleCopyStudyPlan}
+                >
+                  <Copy className="h-4 w-4" />
+                  Copy study plan
+                </Button>
               </div>
             </div>
           </div>
@@ -178,4 +204,49 @@ export default function DepartmentDetail() {
       </div>
     </PortalLayout>
   );
+}
+
+function linesForSem(title: string, courses: Course[]): string[] {
+  const lines: string[] = [`${title}:`];
+  if (courses.length === 0) {
+    lines.push("  (none listed)");
+    return lines;
+  }
+  for (const c of courses) {
+    const p = c.prereqs?.length ? ` [Prereq: ${c.prereqs.join(", ")}]` : "";
+    lines.push(`  • ${c.code} — ${c.name} (${c.credits} cr)${p}`);
+  }
+  return lines;
+}
+
+function buildStudyPlanExport(params: {
+  department: Department;
+  student: Student | null;
+  isFirstYear: boolean;
+  freshmanCourses: FreshmanCourses;
+  departmentCourses: { sem1: Course[]; sem2: Course[] };
+}): string {
+  const { department, student, isFirstYear, freshmanCourses, departmentCourses } = params;
+  const lines: string[] = [];
+  lines.push("HARAMAYA UNIVERSITY — STUDY PLAN (demo export)");
+  lines.push(`Department: ${department.name} (${department.id})`);
+  if (student) {
+    lines.push(`Student: ${student.fullName} (${student.id})`);
+    lines.push(`Year level: ${student.year}`);
+  }
+  lines.push("");
+  if (isFirstYear) {
+    lines.push("Note: First-year students follow the common freshman curriculum.");
+    lines.push("");
+    lines.push(...linesForSem("Semester I — Common freshman", freshmanCourses.sem1));
+    lines.push("");
+    lines.push(...linesForSem("Semester II — Common freshman", freshmanCourses.sem2));
+  } else {
+    lines.push(...linesForSem(`Semester I — Year ${student?.year}`, departmentCourses.sem1));
+    lines.push("");
+    lines.push(...linesForSem(`Semester II — Year ${student?.year}`, departmentCourses.sem2));
+  }
+  lines.push("");
+  lines.push("Generated from the student portal (sample data).");
+  return lines.join("\n");
 }

@@ -1,7 +1,8 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { getDepartments, clearSession, getCurrentStudent, type Department } from "@/lib/data";
-import { useState, useEffect } from "react";
+import { getDepartments, clearSession, getCurrentStudent, getDepartmentById, type Department } from "@/lib/data";
+import { useState, useEffect, useMemo } from "react";
+import { getStarredDeptIds, getRecentDeptIds, PORTAL_PREFS_EVENT } from "@/lib/portalPrefs";
 
 interface PortalSidebarProps {
   isOpen: boolean;
@@ -12,11 +13,32 @@ export function PortalSidebar({ isOpen, onClose }: PortalSidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const [departments, setDepartments] = useState<Department[]>([]);
+  const [prefsVersion, setPrefsVersion] = useState(0);
   const student = getCurrentStudent();
 
   useEffect(() => {
-    setDepartments(getDepartments());
+    const sync = () => {
+      setDepartments(getDepartments());
+      setPrefsVersion((v) => v + 1);
+    };
+    sync();
+    window.addEventListener(PORTAL_PREFS_EVENT, sync);
+    return () => window.removeEventListener(PORTAL_PREFS_EVENT, sync);
   }, []);
+
+  const starredDepartments = useMemo(() => {
+    void prefsVersion;
+    return getStarredDeptIds()
+      .map((id) => getDepartmentById(id))
+      .filter((d): d is Department => !!d);
+  }, [prefsVersion, departments]);
+
+  const recentDepartments = useMemo(() => {
+    void prefsVersion;
+    return getRecentDeptIds()
+      .map((id) => getDepartmentById(id))
+      .filter((d): d is Department => !!d);
+  }, [prefsVersion, departments]);
 
   const handleLogout = () => {
     clearSession();
@@ -25,6 +47,7 @@ export function PortalSidebar({ isOpen, onClose }: PortalSidebarProps) {
 
   const navItems = [
     { label: "Dashboard", path: "/dashboard", icon: "🏠" },
+    { label: "Course catalog", path: "/catalog", icon: "🔎" },
     { label: "Announcements", path: "/announcements", icon: "📣" },
     { label: "Academic calendar", path: "/calendar", icon: "🗓️" },
     { label: "My Profile", path: "/profile", icon: "👤" },
@@ -90,6 +113,63 @@ export function PortalSidebar({ isOpen, onClose }: PortalSidebarProps) {
               ))}
             </ul>
           </div>
+
+          {starredDepartments.length > 0 && (
+            <div className="mb-6">
+              <p className="text-xs font-medium text-sidebar-foreground/50 uppercase tracking-wider mb-3 px-3">
+                Starred
+              </p>
+              <ul className="space-y-1">
+                {starredDepartments.map((dept) => (
+                  <li key={`star-${dept.id}`}>
+                    <Link
+                      to={`/department/${dept.id}`}
+                      onClick={onClose}
+                      className={cn(
+                        "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
+                        location.pathname === `/department/${dept.id}`
+                          ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                          : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
+                      )}
+                    >
+                      <span className="text-lg">{dept.icon}</span>
+                      <span className="font-medium text-sm truncate">{dept.name}</span>
+                      <span className="ml-auto text-secondary" aria-hidden>
+                        ★
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {recentDepartments.length > 0 && (
+            <div className="mb-6">
+              <p className="text-xs font-medium text-sidebar-foreground/50 uppercase tracking-wider mb-3 px-3">
+                Recently viewed
+              </p>
+              <ul className="space-y-1">
+                {recentDepartments.map((dept) => (
+                  <li key={`recent-${dept.id}`}>
+                    <Link
+                      to={`/department/${dept.id}`}
+                      onClick={onClose}
+                      className={cn(
+                        "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
+                        location.pathname === `/department/${dept.id}`
+                          ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                          : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
+                      )}
+                    >
+                      <span className="text-lg">{dept.icon}</span>
+                      <span className="font-medium text-sm truncate">{dept.name}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           {/* Departments */}
           <div>

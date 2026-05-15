@@ -78,6 +78,10 @@ export function PortalQuickNav() {
               <span className="mr-2 text-base">🗓️</span>
               Academic calendar
             </CommandItem>
+            <CommandItem value="course catalog search all courses curriculum" onSelect={() => runCommand("/catalog")}>
+              <span className="mr-2 text-base">🔎</span>
+              Course catalog
+            </CommandItem>
             <CommandItem value="profile account" onSelect={() => runCommand("/profile")}>
               <span className="mr-2 text-base">👤</span>
               My profile

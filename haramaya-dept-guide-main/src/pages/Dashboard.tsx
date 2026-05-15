@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { PortalLayout } from "@/components/portal/PortalLayout";
+import { DeptStarButton } from "@/components/portal/DeptStarButton";
 import {
   getCurrentStudent,
   getDepartments,
@@ -211,10 +212,11 @@ export default function Dashboard() {
               <Link
                 key={dept.id}
                 to={`/department/${dept.id}`}
-                className="card-elevated p-5 hover:shadow-md transition-all duration-200 group animate-fade-in"
+                className="card-elevated p-5 hover:shadow-md transition-all duration-200 group animate-fade-in relative block"
                 style={{ animationDelay: `${300 + index * 50}ms` }}
               >
-                <div className="flex items-start gap-4">
+                <DeptStarButton deptId={dept.id} className="absolute top-3 right-3 z-10" size="md" />
+                <div className="flex items-start gap-4 pr-10">
                   <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
                     {dept.icon}
                   </div>

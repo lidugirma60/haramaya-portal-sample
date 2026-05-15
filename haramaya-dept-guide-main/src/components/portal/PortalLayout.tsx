@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { PortalSidebar } from "./PortalSidebar";
 import { PortalQuickNav } from "./PortalQuickNav";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { getSession, seedDataIfEmpty } from "@/lib/data";
 
 interface PortalLayoutProps {
@@ -58,6 +59,7 @@ export function PortalLayout({ children, title }: PortalLayoutProps) {
 
             <div className="flex items-center gap-2 sm:gap-3 flex-1 sm:flex-initial justify-end min-w-0">
               <PortalQuickNav />
+              <ThemeToggle />
               <Link
                 to="/announcements"
                 className="p-2 rounded-lg hover:bg-muted transition-colors relative shrink-0"
