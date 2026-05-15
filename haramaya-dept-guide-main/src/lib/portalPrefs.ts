@@ -28,15 +28,14 @@ export function isDeptStarred(deptId: string): boolean {
   return getStarredDeptIds().includes(deptId);
 }
 
-/** @returns new starred state */
+/** @returns new starred state (true = now starred) */
 export function toggleStarredDept(deptId: string): boolean {
-  const ids = getStarredDeptIds().filter((id) => id !== deptId);
-  const wasStarred = ids.length !== getStarredDeptIds().length;
-  if (wasStarred) {
-    setStarredDeptIds(ids);
+  const current = getStarredDeptIds();
+  if (current.includes(deptId)) {
+    setStarredDeptIds(current.filter((id) => id !== deptId));
     return false;
   }
-  setStarredDeptIds([deptId, ...getStarredDeptIds()]);
+  setStarredDeptIds([deptId, ...current]);
   return true;
 }
 
