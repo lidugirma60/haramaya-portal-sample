@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { PortalSidebar } from "./PortalSidebar";
+import { PortalQuickNav } from "./PortalQuickNav";
 import { getSession, seedDataIfEmpty } from "@/lib/data";
 
 interface PortalLayoutProps {
@@ -49,14 +50,19 @@ export function PortalLayout({ children, title }: PortalLayoutProps) {
                 </svg>
               </button>
               {title && (
-                <h1 className="font-heading text-xl font-semibold text-foreground">
+                <h1 className="font-heading text-xl font-semibold text-foreground lg:ml-0">
                   {title}
                 </h1>
               )}
             </div>
 
-            <div className="flex items-center gap-3">
-              <button className="p-2 rounded-lg hover:bg-muted transition-colors relative">
+            <div className="flex items-center gap-2 sm:gap-3 flex-1 sm:flex-initial justify-end min-w-0">
+              <PortalQuickNav />
+              <Link
+                to="/announcements"
+                className="p-2 rounded-lg hover:bg-muted transition-colors relative shrink-0"
+                aria-label="View announcements"
+              >
                 <svg
                   className="w-5 h-5 text-muted-foreground"
                   fill="none"
@@ -70,8 +76,8 @@ export function PortalLayout({ children, title }: PortalLayoutProps) {
                     d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
                   />
                 </svg>
-                <span className="absolute top-1 right-1 w-2 h-2 bg-secondary rounded-full"></span>
-              </button>
+                <span className="absolute top-1 right-1 w-2 h-2 bg-secondary rounded-full" aria-hidden />
+              </Link>
             </div>
           </div>
         </header>

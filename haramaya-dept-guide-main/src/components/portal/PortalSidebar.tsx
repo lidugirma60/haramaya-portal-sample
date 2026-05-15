@@ -25,6 +25,8 @@ export function PortalSidebar({ isOpen, onClose }: PortalSidebarProps) {
 
   const navItems = [
     { label: "Dashboard", path: "/dashboard", icon: "🏠" },
+    { label: "Announcements", path: "/announcements", icon: "📣" },
+    { label: "Academic calendar", path: "/calendar", icon: "🗓️" },
     { label: "My Profile", path: "/profile", icon: "👤" },
     { label: "Settings", path: "/settings", icon: "⚙️" },
   ];

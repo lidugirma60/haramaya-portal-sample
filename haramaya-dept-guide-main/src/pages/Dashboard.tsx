@@ -8,6 +8,7 @@ import {
   getFreshmanCourses,
   type Department,
 } from "@/lib/data";
+import { ANNOUNCEMENTS, ACADEMIC_DATES, formatDisplayDate } from "@/lib/portalFeeds";
 
 export default function Dashboard() {
   const [student, setStudent] = useState(getCurrentStudent());
@@ -24,6 +25,15 @@ export default function Dashboard() {
   const totalFreshmanCredits =
     freshmanCourses.sem1.reduce((a, c) => a + c.credits, 0) +
     freshmanCourses.sem2.reduce((a, c) => a + c.credits, 0);
+
+  const latestAnnouncements = [...ANNOUNCEMENTS]
+    .sort((a, b) => new Date(b.postedAt).getTime() - new Date(a.postedAt).getTime())
+    .slice(0, 2);
+
+  const upcomingDates = [...ACADEMIC_DATES]
+    .filter((d) => new Date(d.date + "T12:00:00") >= new Date(new Date().toDateString()))
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    .slice(0, 3);
 
   return (
     <PortalLayout title="Dashboard">
@@ -131,6 +141,61 @@ export default function Dashboard() {
             </div>
           </div>
         )}
+
+        <div className="grid lg:grid-cols-2 gap-4">
+          <div className="card-elevated p-5 animate-fade-in">
+            <div className="flex items-center justify-between gap-2 mb-4">
+              <h2 className="font-heading text-lg font-semibold text-foreground">
+                Latest announcements
+              </h2>
+              <Link
+                to="/announcements"
+                className="text-sm font-medium text-primary hover:underline shrink-0"
+              >
+                View all
+              </Link>
+            </div>
+            <ul className="space-y-3">
+              {latestAnnouncements.map((a) => (
+                <li key={a.id}>
+                  <Link to="/announcements" className="block group">
+                    <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+                      {a.title}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {formatDisplayDate(a.postedAt)} · {a.summary}
+                    </p>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="card-elevated p-5 animate-fade-in" style={{ animationDelay: "80ms" }}>
+            <div className="flex items-center justify-between gap-2 mb-4">
+              <h2 className="font-heading text-lg font-semibold text-foreground">Upcoming dates</h2>
+              <Link to="/calendar" className="text-sm font-medium text-primary hover:underline shrink-0">
+                Full calendar
+              </Link>
+            </div>
+            {upcomingDates.length > 0 ? (
+              <ul className="space-y-3">
+                {upcomingDates.map((d) => (
+                  <li key={d.id} className="flex gap-3 text-sm">
+                    <span className="text-muted-foreground whitespace-nowrap tabular-nums shrink-0">
+                      {formatDisplayDate(d.date)}
+                    </span>
+                    <span className="text-foreground">{d.label}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                No upcoming dates in the sample calendar.
+              </p>
+            )}
+          </div>
+        </div>
 
         {/* Departments Grid */}
         <div>
