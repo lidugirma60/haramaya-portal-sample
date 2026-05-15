@@ -1,0 +1,7 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "npm ci --prefix haramaya-dept-guide-main",
+  "buildCommand": "npm run build --prefix haramaya-dept-guide-main",
+  "outputDirectory": "haramaya-dept-guide-main/dist",
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}
